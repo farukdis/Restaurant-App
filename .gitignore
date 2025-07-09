@@ -1,0 +1,36 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.env
+.env.*.local
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Docker
+*.env
+*.pem
+*.log
+docker-compose.override.yml # Eğer kullanıyorsanız ve özel ayarlarınız varsa
+.docker
+*.dockerignore
+
+# IDEs
+.idea/
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Misc
+.cache/
+.eslintcache
