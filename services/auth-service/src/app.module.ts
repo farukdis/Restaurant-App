@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'; // **DEĞİŞTİ: OnModuleInit kaldırıldı**
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,8 +7,9 @@ import { User } from './entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { AdminUser } from './entities/admin-user.entity';
 import { Role } from './entities/role.entity';
-import { PasswordResetToken } from './entities/password-reset-token.entity'; // <-- Bu satırı ekleyin!
-// import { DataSource } from 'typeorm'; // **DEĞİŞTİ: DataSource artık gerekli değil, kaldırıldı**
+import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { Address } from './entities/address.entity'; // **YENİ: Address entity'si import edildi**
+import { AddressModule } from './address/address.module'; // **YENİ: AddressModule import edildi**
 
 @Module({
   imports: [
@@ -25,16 +26,16 @@ import { PasswordResetToken } from './entities/password-reset-token.entity'; // 
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, AdminUser, Role, PasswordResetToken],
+        entities: [User, AdminUser, Role, PasswordResetToken, Address], // **DEĞİŞTİ: Address entity'si eklendi**
         synchronize: true,
         logging: ['query', 'error'],
       }),
       inject: [ConfigService],
     }),
     AuthModule,
+    AddressModule, // **YENİ: AddressModule eklendi**
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-
 export class AppModule { }

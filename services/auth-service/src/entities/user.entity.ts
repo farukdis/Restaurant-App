@@ -1,8 +1,8 @@
-// services/auth-service/src/entities/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm'; // **DEĞİŞTİ: OneToMany import edildi**
-import { PasswordResetToken } from './password-reset-token.entity'; // **YENİ: PasswordResetToken import edildi**
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { PasswordResetToken } from './password-reset-token.entity';
+import { Address } from './address.entity'; // YENİ: Address entity'sini import et
 
-@Entity('users') // PostgreSQL'de tablo adını belirtir
+@Entity('users')
 export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -13,7 +13,7 @@ export class User {
     @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
     phone_number: string;
 
-    @Column({ select: false }) // Şifrenin doğrudan entity'den çekilmesini engelle
+    @Column({ select: false })
     password: string;
 
     @Column()
@@ -34,7 +34,10 @@ export class User {
     @Column({ type: 'timestamp with time zone', nullable: true })
     last_login_at: Date;
 
-    // Yeni: Bir kullanıcının birden fazla şifre sıfırlama tokenı olabilir
     @OneToMany(() => PasswordResetToken, passwordResetToken => passwordResetToken.user)
     passwordResetTokens: PasswordResetToken[];
+
+    // YENİ: Bir kullanıcının birden fazla adresi olabilir
+    @OneToMany(() => Address, address => address.user)
+    addresses: Address[];
 }
