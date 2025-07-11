@@ -1,20 +1,29 @@
 // services/auth-service/src/auth/auth.service.ts
-import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { PasswordResetToken } from '../entities/password-reset-token.entity';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { RegisteredUserDto } from './dto/registered-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { ChangePasswordDto } from './dto/change-password.dto'; // <-- YENİ EKLENDİ
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto'; // <-- YENİ EKLENDİ
+import { promisify } from 'util';
+import { randomBytes } from 'crypto';
+
+const randomBytesAsync = promisify(randomBytes);
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        @InjectRepository(PasswordResetToken)
+        private passwordResetTokensRepository: Repository<PasswordResetToken>,
         private jwtService: JwtService,
     ) { }
 
@@ -116,31 +125,89 @@ export class AuthService {
         return new UserProfileDto(user);
     }
 
-    // YENİ METOT: Kullanıcının parolasını değiştirir
     async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
         console.log('Changing password for userId:', userId);
 
         const user = await this.usersRepository.findOne({
             where: { id: userId },
-            select: ['id', 'password'], // Parola doğrulaması için password'ü seçiyoruz
+            select: ['id', 'password'],
         });
 
         if (!user) {
             throw new NotFoundException('Kullanıcı bulunamadı.');
         }
 
-        // Mevcut parolayı doğrula
         const isCurrentPasswordValid = await bcrypt.compare(changePasswordDto.current_password, user.password);
         if (!isCurrentPasswordValid) {
             throw new UnauthorizedException('Mevcut parola hatalı.');
         }
 
-        // Yeni parolayı hashle ve kaydet
         const hashedNewPassword = await bcrypt.hash(changePasswordDto.new_password, 10);
         user.password = hashedNewPassword;
         await this.usersRepository.save(user);
 
         return { message: 'Parola başarıyla değiştirildi.' };
+    }
+
+    async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
+        console.log('Forgot password request for:', forgotPasswordDto.email);
+        const user = await this.usersRepository.findOne({ where: { email: forgotPasswordDto.email } });
+
+        if (!user) {
+            return { message: 'Parola sıfırlama bağlantısı e-posta adresinize gönderildi.' };
+        }
+
+        const tokenBuffer = await randomBytesAsync(32);
+        const token = tokenBuffer.toString('hex');
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 1);
+
+        await this.passwordResetTokensRepository
+            .createQueryBuilder()
+            .delete()
+            .from(PasswordResetToken)
+            .where('userId = :userId', { userId: user.id })
+            .andWhere('used = :isUsed', { isUsed: false }) // **DEĞİŞTİ**
+            .execute();
+
+        const newPasswordResetToken = this.passwordResetTokensRepository.create({
+            token,
+            expires_at: expiresAt,
+            user,
+        });
+
+        await this.passwordResetTokensRepository.save(newPasswordResetToken);
+
+        console.log(`Parola sıfırlama token'ı oluşturuldu: ${token}`);
+
+        return { message: 'Parola sıfırlama bağlantısı e-posta adresinize gönderildi.' };
+    }
+
+    async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
+        console.log('Reset password request with token:', resetPasswordDto.token);
+
+        const passwordResetToken = await this.passwordResetTokensRepository.findOne({
+            where: { token: resetPasswordDto.token },
+            relations: ['user'],
+        });
+
+        if (!passwordResetToken || passwordResetToken.used || passwordResetToken.expires_at < new Date()) { // **DEĞİŞTİ**
+            throw new BadRequestException('Geçersiz veya süresi dolmuş parola sıfırlama tokenı.');
+        }
+
+        const user = passwordResetToken.user;
+        if (!user) {
+            throw new NotFoundException('Token ile ilişkili kullanıcı bulunamadı.');
+        }
+
+        const hashedNewPassword = await bcrypt.hash(resetPasswordDto.new_password, 10);
+        user.password = hashedNewPassword;
+        await this.usersRepository.save(user);
+
+        passwordResetToken.used = true; // **DEĞİŞTİ**
+        await this.passwordResetTokensRepository.save(passwordResetToken);
+
+        return { message: 'Parolanız başarıyla sıfırlandı.' };
     }
 
     async validateUserById(userId: string): Promise<User | null> {
