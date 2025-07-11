@@ -48,7 +48,7 @@ export class AuthController {
 
 
     @Patch('users/me/password') // **YENİ: PATCH /api/auth/users/me/password endpoint'i**
-    @UseGuards(AuthGuard('jwt')) // Bu endpoint'i JWT stratejisi ile koru
+    @UseGuards(AuthGuard('jwt'))
     @HttpCode(HttpStatus.OK)
     async changeMyPassword(@Req() req: Request, @Body() changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
         const user = req.user as UserEntity;
