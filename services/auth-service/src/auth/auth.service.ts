@@ -1,21 +1,23 @@
+// services/auth-service/src/auth/auth.service.ts
 import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../entities/user.entity'; // User entity'sini kullanıyoruz
+import { User } from '../entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { RegisteredUserDto } from './dto/registered-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto'; // <-- YENİ EKLENDİ
 
 @Injectable()
 export class AuthService {
     constructor(
-        @InjectRepository(User) // Sadece User Repository'sini enjekte ediyoruz
+        @InjectRepository(User)
         private usersRepository: Repository<User>,
         private jwtService: JwtService,
     ) { }
 
-    // Bu register metodu artık sadece MÜŞTERİ kullanıcılarını kaydeder.
     async register(
         email: string,
         password: string,
@@ -35,12 +37,10 @@ export class AuthService {
             password: hashedPassword,
             full_name,
             phone_number,
-            is_active: true, // Varsayılan olarak aktif
-            // last_login_at alanı burada belirtilmiyor, entity'de nullable olduğu için TypeORM otomatik olarak NULL bırakacak
+            is_active: true,
         });
         await this.usersRepository.save(newUser);
 
-        // JWT payload'ına rol bilgisi eklemeyeceğiz, çünkü bu müşteri kullanıcısı
         const payload = { email: newUser.email, sub: newUser.id };
         const accessToken = await this.jwtService.sign(payload);
 
@@ -49,7 +49,6 @@ export class AuthService {
         return { user: registeredUserDto, token: accessToken };
     }
 
-    // Bu login metodu sadece MÜŞTERİ kullanıcılarını doğrular.
     async login(email: string, password: string): Promise<{ accessToken: string }> {
         console.log('Login method called for customer:', email);
         const user = await this.usersRepository.findOne({
@@ -79,12 +78,10 @@ export class AuthService {
         return { accessToken };
     }
 
-    // Kullanıcı profili bilgilerini getiren metot (GET /users/me için)
     async getProfile(userId: string): Promise<UserProfileDto> {
         console.log('Fetching profile for userId:', userId);
         const user = await this.usersRepository.findOne({
             where: { id: userId },
-            // Sadece UserProfileDto'da olan alanları seçiyoruz (password'ü seçmiyoruz!)
             select: ['id', 'email', 'full_name', 'phone_number', 'profile_picture_url', 'is_active'],
         });
 
@@ -92,11 +89,60 @@ export class AuthService {
             throw new NotFoundException('Kullanıcı profili bulunamadı.');
         }
 
-        // Bulunan kullanıcı varlığını UserProfileDto'ya dönüştür ve döndür
         return new UserProfileDto(user);
     }
 
-    // Bu metot, JWT stratejisi tarafından kullanıcının varlığını doğrulamak için kullanılır
+    async updateProfile(userId: string, updateData: UpdateUserProfileDto): Promise<UserProfileDto> {
+        console.log('Updating profile for userId:', userId, 'with data:', updateData);
+
+        const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+        if (!user) {
+            throw new NotFoundException('Kullanıcı profili bulunamadı.');
+        }
+
+        if (updateData.full_name !== undefined) {
+            user.full_name = updateData.full_name;
+        }
+        if (updateData.phone_number !== undefined) {
+            user.phone_number = updateData.phone_number;
+        }
+        if (updateData.profile_picture_url !== undefined) {
+            user.profile_picture_url = updateData.profile_picture_url;
+        }
+
+        await this.usersRepository.save(user);
+
+        return new UserProfileDto(user);
+    }
+
+    // YENİ METOT: Kullanıcının parolasını değiştirir
+    async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
+        console.log('Changing password for userId:', userId);
+
+        const user = await this.usersRepository.findOne({
+            where: { id: userId },
+            select: ['id', 'password'], // Parola doğrulaması için password'ü seçiyoruz
+        });
+
+        if (!user) {
+            throw new NotFoundException('Kullanıcı bulunamadı.');
+        }
+
+        // Mevcut parolayı doğrula
+        const isCurrentPasswordValid = await bcrypt.compare(changePasswordDto.current_password, user.password);
+        if (!isCurrentPasswordValid) {
+            throw new UnauthorizedException('Mevcut parola hatalı.');
+        }
+
+        // Yeni parolayı hashle ve kaydet
+        const hashedNewPassword = await bcrypt.hash(changePasswordDto.new_password, 10);
+        user.password = hashedNewPassword;
+        await this.usersRepository.save(user);
+
+        return { message: 'Parola başarıyla değiştirildi.' };
+    }
+
     async validateUserById(userId: string): Promise<User | null> {
         return this.usersRepository.findOne({ where: { id: userId } });
     }

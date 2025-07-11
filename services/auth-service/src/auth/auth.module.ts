@@ -8,11 +8,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
-import { PasswordResetToken } from '../entities/password-reset-token.entity'; // **YENİ: PasswordResetToken import edildi**
+import { PasswordResetToken } from '../entities/password-reset-token.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, PasswordResetToken]), // **DEĞİŞTİ: PasswordResetToken eklendi**
+    TypeOrmModule.forFeature([User, PasswordResetToken]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
