@@ -153,3 +153,8 @@ networks:
 # Veritabanı Verileri için Volume
 volumes:
   db_data:
+
+
+# DOCKER İÇİN ÖNEMLİ DURDURMA VE BAŞLATMA SIRA İLE
+# docker compose down --volumes --remove-orphans
+# docker compose up --build -d
