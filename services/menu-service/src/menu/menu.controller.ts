@@ -1,17 +1,16 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { MenuService } from './menu.service';
+import { Product } from '../entities/product.entity'; // Product entity'sini import et
 
 @Controller('menu')
 export class MenuController {
     constructor(private readonly menuService: MenuService) { }
 
-    // Plan: GET /menu/categories
     @Get('categories')
     async findAllCategories() {
         return this.menuService.findAllCategories();
     }
 
-    // Plan: GET /menu/categories/{category_id}/products
     @Get('categories/:categoryId/products')
     async findProductsByCategory(
         @Param('categoryId', new ParseUUIDPipe()) categoryId: string,
@@ -19,11 +18,16 @@ export class MenuController {
         return this.menuService.findProductsByCategory(categoryId);
     }
 
-    // Plan: GET /menu/products/{product_id}
+    // **YENİ: Tüm ürünleri listeleyen endpoint eklendi**
+    @Get('products')
+    async findAllProducts(): Promise<Product[]> {
+        return this.menuService.findAllProducts();
+    }
+
     @Get('products/:productId')
     async findOneProduct(
         @Param('productId', new ParseUUIDPipe()) productId: string,
-    ) {
+    ): Promise<Product> {
         return this.menuService.findOneProduct(productId);
     }
 }

@@ -55,4 +55,9 @@ export class MenuService {
 
         return product;
     }
+
+    // **YENİ: Tüm ürünleri bulma metodu**
+    async findAllProducts(): Promise<Product[]> {
+        return this.productsRepository.find();
+    }
 }

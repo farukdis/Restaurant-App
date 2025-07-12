@@ -12,6 +12,8 @@ import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderItemModifier } from './entities/order-item-modifier.entity';
 import { OrderStatusLog } from './entities/order-status-log.entity';
+import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -39,9 +41,13 @@ import { OrderStatusLog } from './entities/order-status-log.entity';
           OrderStatusLog
         ],
         synchronize: true,
+        retryAttempts: 10, // **YENİ: Retry mekanizması eklendi**
+        retryDelay: 3000, // **YENİ: Retry mekanizması eklendi**
       }),
       inject: [ConfigService],
     }),
+    CartModule,
+    OrderModule,
   ],
   controllers: [],
   providers: [],

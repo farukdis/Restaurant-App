@@ -10,7 +10,7 @@ import { User as UserEntity } from '../entities/user.entity';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto'; // **YENİ: ResetPasswordDto import edildi**
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('')
 export class AuthController {
