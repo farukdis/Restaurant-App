@@ -8,6 +8,7 @@ import { Restaurant } from './entities/restaurant.entity';
 import { WorkingHours } from './entities/working-hours.entity';
 import { DeliveryZone } from './entities/delivery-zone.entity';
 import { Setting } from './entities/setting.entity';
+import { RestaurantModule } from './restaurant/restaurant.module'; // **YENİ: RestaurantModule import edildi**
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { Setting } from './entities/setting.entity';
       }),
       inject: [ConfigService],
     }),
+    RestaurantModule, // **YENİ: RestaurantModule eklendi**
   ],
   controllers: [],
   providers: [],

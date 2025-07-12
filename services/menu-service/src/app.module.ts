@@ -11,12 +11,13 @@ import { ProductAllergen } from './entities/product-allergen.entity';
 import { Modifier } from './entities/modifier.entity';
 import { ModifierOption } from './entities/modifier-option.entity';
 import { ProductModifier } from './entities/product-modifier.entity';
+import { MenuModule } from './menu/menu.module'; // **YENİ: MenuModule import edildi**
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: '.env', // Bu satır, servis kendi .env dosyasını okuyacak
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -33,6 +34,7 @@ import { ProductModifier } from './entities/product-modifier.entity';
       }),
       inject: [ConfigService],
     }),
+    MenuModule, // **YENİ: MenuModule eklendi**
   ],
   controllers: [],
   providers: [],
