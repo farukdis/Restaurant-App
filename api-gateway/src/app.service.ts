@@ -6,51 +6,64 @@ import { firstValueFrom } from 'rxjs';
 export class AppService {
   constructor(private readonly httpService: HttpService) { }
 
-  async getAuthServiceData(): Promise<any> {
-    const url = 'http://auth-service:3001/api/auth';
+  // test-auth endpoint'i için kullanılacak metod
+  async getAuthServiceRoot(): Promise<any> {
+    const url = 'http://auth-service:3001/api/auth'; // Auth service'in ana yolu
     try {
       const response = await firstValueFrom(
         this.httpService.get(url, { timeout: 10000 })
       );
       return {
-        message: 'Auth Service\'ten başarıyla yanıt alındı!',
+        message: 'Auth Service\'in ana yolundan başarıyla yanıt alındı!',
         data: response.data,
         status: response.status,
       };
     } catch (error: any) {
-      console.error('Auth Service Bağlantı Hatası:', error.message);
+      console.error('Auth Service Kök Bağlantı Hatası:', error.message);
       if (error.response) {
         throw new HttpException(
-          `Auth Service Hatası: ${JSON.stringify(error.response.data)}`,
+          `Auth Service Kök Hatası: ${JSON.stringify(error.response.data)}`,
           error.response.status
         );
       }
       throw new HttpException(
-        `Auth Service Hatası: ${error.message}`,
+        `Auth Service Kök Hatası: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
-  // Bu metodu ekliyoruz
-  async registerUser(userData: any): Promise<any> {
-    const url = 'http://auth-service:3001/api/auth/register';
+  // Auth Service'in tüm endpoint'leri için genel proxy metodu
+  async proxyAuthRequest(method: string, path: string, body?: any, headers?: any): Promise<any> {
+    const url = `http://auth-service:3001/api/auth/${path}`; // Auth service'in temel URL'i
+
     try {
       const response = await firstValueFrom(
-        this.httpService.post(url, userData, { timeout: 10000 })
+        this.httpService.request({
+          method: method as any,
+          url,
+          data: body,
+          headers: {
+            ...headers, // Gelen tüm başlıkları (Authorization gibi) ilet
+            host: 'auth-service:3001', // Host başlığını yeniden yazmak önemlidir
+          },
+          timeout: 10000,
+        }),
       );
       return response.data;
     } catch (error: any) {
-      console.error('Kayıt Hatası:', error.message);
+      console.error(`Proxy Hatası (${method} ${path}):`, error.message);
       if (error.response) {
+        // Hedef servisten gelen hata yanıtını doğrudan ilet
         throw new HttpException(
-          `Kayıt Hatası: ${JSON.stringify(error.response.data)}`,
+          `Hata: ${JSON.stringify(error.response.data)}`,
           error.response.status
         );
       }
+      // Ağ veya diğer genel hatalar için
       throw new HttpException(
-        `Kayıt Hatası: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        `Ulaşılamıyor: ${error.message}`,
+        HttpStatus.BAD_GATEWAY
       );
     }
   }
