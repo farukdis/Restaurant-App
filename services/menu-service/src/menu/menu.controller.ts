@@ -1,6 +1,6 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { MenuService } from './menu.service';
-import { Product } from '../entities/product.entity'; // Product entity'sini import et
+import { Product } from '../entities/product.entity';
 
 @Controller('menu')
 export class MenuController {
