@@ -11,7 +11,8 @@ import { ProductAllergen } from './entities/product-allergen.entity';
 import { Modifier } from './entities/modifier.entity';
 import { ModifierOption } from './entities/modifier-option.entity';
 import { ProductModifier } from './entities/product-modifier.entity';
-import { MenuModule } from './menu/menu.module'; // **YENİ: MenuModule import edildi**
+import { MenuModule } from './menu/menu.module';
+import { ProductModule } from './product/product.module'; // ProductModule'ü import edin
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { MenuModule } from './menu/menu.module'; // **YENİ: MenuModule import e
       }),
       inject: [ConfigService],
     }),
-    MenuModule, // **YENİ: MenuModule eklendi**
+    MenuModule,
+    ProductModule, // ProductModule'ü buraya ekleyin
   ],
   controllers: [],
   providers: [],
