@@ -14,16 +14,26 @@ export class WorkingHoursService {
         private readonly workingHoursRepository: Repository<WorkingHours>,
     ) { }
 
-    async create(createWorkingHoursDto: CreateWorkingHoursDto): Promise<WorkingHours> {
-        const newWorkingHour = this.workingHoursRepository.create(createWorkingHoursDto);
+    // Yeni: Belirli bir restorana ait tüm çalışma saatlerini bulma
+    async findAllByRestaurantId(restaurantId: string): Promise<WorkingHours[]> {
+        return this.workingHoursRepository.findBy({ restaurant_id: restaurantId });
+    }
+
+    // Güncellendi: Restaurant ID'sini de alıyor
+    async create(restaurantId: string, createWorkingHoursDto: CreateWorkingHoursDto): Promise<WorkingHours> {
+        const newWorkingHour = this.workingHoursRepository.create({
+            ...createWorkingHoursDto,
+            restaurant_id: restaurantId,
+        });
         return this.workingHoursRepository.save(newWorkingHour);
     }
 
-    async update(id: string, updateWorkingHoursDto: UpdateWorkingHoursDto): Promise<WorkingHours> {
-        const workingHour = await this.workingHoursRepository.findOneBy({ id });
+    // Güncellendi: Restaurant ID'sini doğrulama için kullanıyor
+    async update(restaurantId: string, id: string, updateWorkingHoursDto: UpdateWorkingHoursDto): Promise<WorkingHours> {
+        const workingHour = await this.workingHoursRepository.findOneBy({ id, restaurant_id: restaurantId });
 
         if (!workingHour) {
-            throw new NotFoundException(`WorkingHours with ID "${id}" not found.`);
+            throw new NotFoundException(`WorkingHours with ID "${id}" for restaurant "${restaurantId}" not found.`);
         }
 
         const updatedWorkingHour = this.workingHoursRepository.merge(workingHour, updateWorkingHoursDto);

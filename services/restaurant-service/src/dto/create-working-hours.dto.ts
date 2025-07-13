@@ -1,11 +1,8 @@
-// services/restaurant-service/src/working-hours/dto/create-working-hours.dto.ts
+// services/restaurant-service/src/dto/create-working-hours.dto.ts
 
-import { IsUUID, IsInt, IsString, IsBoolean, IsOptional, Min, Max, Matches } from 'class-validator';
+import { IsInt, IsString, IsBoolean, IsOptional, Min, Max, Matches } from 'class-validator';
 
 export class CreateWorkingHoursDto {
-    @IsUUID()
-    restaurant_id: string;
-
     @IsInt()
     @Min(0)
     @Max(6)

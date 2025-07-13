@@ -14,16 +14,26 @@ export class DeliveryZonesService {
         private readonly deliveryZoneRepository: Repository<DeliveryZone>,
     ) { }
 
-    async create(createDeliveryZoneDto: CreateDeliveryZoneDto): Promise<DeliveryZone> {
-        const newDeliveryZone = this.deliveryZoneRepository.create(createDeliveryZoneDto);
+    // Yeni: Belirli bir restorana ait tüm teslimat bölgelerini bulma
+    async findAllByRestaurantId(restaurantId: string): Promise<DeliveryZone[]> {
+        return this.deliveryZoneRepository.findBy({ restaurant_id: restaurantId });
+    }
+
+    // Güncellendi: Restaurant ID'sini de alıyor
+    async create(restaurantId: string, createDeliveryZoneDto: CreateDeliveryZoneDto): Promise<DeliveryZone> {
+        const newDeliveryZone = this.deliveryZoneRepository.create({
+            ...createDeliveryZoneDto,
+            restaurant_id: restaurantId,
+        });
         return this.deliveryZoneRepository.save(newDeliveryZone);
     }
 
-    async update(id: string, updateDeliveryZoneDto: UpdateDeliveryZoneDto): Promise<DeliveryZone> {
-        const deliveryZone = await this.deliveryZoneRepository.findOneBy({ id });
+    // Güncellendi: Restaurant ID'sini doğrulama için kullanıyor
+    async update(restaurantId: string, id: string, updateDeliveryZoneDto: UpdateDeliveryZoneDto): Promise<DeliveryZone> {
+        const deliveryZone = await this.deliveryZoneRepository.findOneBy({ id, restaurant_id: restaurantId });
 
         if (!deliveryZone) {
-            throw new NotFoundException(`Delivery zone with ID "${id}" not found.`);
+            throw new NotFoundException(`Delivery zone with ID "${id}" for restaurant "${restaurantId}" not found.`);
         }
 
         const updatedDeliveryZone = this.deliveryZoneRepository.merge(deliveryZone, updateDeliveryZoneDto);

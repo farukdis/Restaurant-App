@@ -7,8 +7,9 @@ import { DeliveryZonesService } from './delivery-zones.service';
 import { DeliveryZone } from '../entities/delivery-zone.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([DeliveryZone])], // DeliveryZone varlığını TypeORM'a kaydet
+    imports: [TypeOrmModule.forFeature([DeliveryZone])],
     controllers: [DeliveryZonesController],
     providers: [DeliveryZonesService],
+    exports: [DeliveryZonesService] // Teslimat bölgeleri servisini dışarıya aktar
 })
 export class DeliveryZonesModule { }

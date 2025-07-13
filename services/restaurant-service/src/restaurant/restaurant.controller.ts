@@ -1,20 +1,23 @@
 // services/restaurant-service/src/restaurant/restaurant.controller.ts
-import { Controller, Get } from '@nestjs/common';
-import { RestaurantService } from './restaurant.service';
 
-@Controller('') // Ön ek boş bırakıldı, global ön ek yeterli
+import { Controller, Get, Put, Body, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import { RestaurantService } from './restaurant.service';
+import { UpdateRestaurantDto } from '../dto/update-restaurant.dto';
+
+@Controller('admin/restaurants')
 export class RestaurantController {
     constructor(private readonly restaurantService: RestaurantService) { }
 
-    // Plan: GET /api/restaurant/working-hours
-    @Get('working-hours')
-    async getWorkingHours() {
-        return this.restaurantService.getWorkingHours();
+    // GET /api/restaurant/admin/restaurants/settings/restaurant-info/{restaurantId}
+    @Get('settings/restaurant-info/:restaurantId')
+    async getRestaurantInfo(@Param('restaurantId') restaurantId: string) {
+        return this.restaurantService.getRestaurantInfo(restaurantId);
     }
 
-    // Plan: GET /api/restaurant/delivery-zones
-    @Get('delivery-zones')
-    async getDeliveryZones() {
-        return this.restaurantService.getDeliveryZones();
+    // PUT /api/restaurant/admin/restaurants/settings/restaurant-info/{restaurantId}
+    @Put('settings/restaurant-info/:restaurantId')
+    @HttpCode(HttpStatus.OK)
+    async updateRestaurantInfo(@Param('restaurantId') restaurantId: string, @Body() updateRestaurantDto: UpdateRestaurantDto) {
+        return this.restaurantService.updateRestaurantInfo(restaurantId, updateRestaurantDto);
     }
 }

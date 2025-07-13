@@ -9,7 +9,8 @@ import { Restaurant } from './entities/restaurant.entity';
 import { WorkingHours } from './entities/working-hours.entity';
 import { DeliveryZone } from './entities/delivery-zone.entity';
 import { Setting } from './entities/setting.entity';
-import { DeliveryZonesModule } from './delivery-zones/delivery-zones.module'; // DeliveryZonesModule'ü import et
+import { DeliveryZonesModule } from './delivery-zones/delivery-zones.module';
+import { WorkingHoursModule } from './working-hours/working-hours.module'; // WorkingHoursModule'ü import et
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { DeliveryZonesModule } from './delivery-zones/delivery-zones.module'; //
       inject: [ConfigService],
     }),
     RestaurantModule,
-    DeliveryZonesModule, // DeliveryZonesModule'ü buraya ekle
+    DeliveryZonesModule,
+    WorkingHoursModule, // WorkingHoursModule'ü buraya ekle
   ],
   controllers: [AppController],
   providers: [AppService],

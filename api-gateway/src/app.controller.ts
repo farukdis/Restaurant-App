@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Req, Patch, Put, Delete, Param, ParseUUIDPipe } from '@nestjs/common';
-import { AppService } from './app.service';
+import { AppService } from './core/app.service';
 import { Request } from 'express';
 
 @Controller('api') // Tüm auth ilgili rotalar /api/auth altında olacak

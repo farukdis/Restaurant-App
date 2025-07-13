@@ -6,8 +6,9 @@ import { WorkingHoursService } from './working-hours.service';
 import { WorkingHours } from '../entities/working-hours.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([WorkingHours])], // Çalışma saatleri deposunu modüle ekle
+    imports: [TypeOrmModule.forFeature([WorkingHours])],
     controllers: [WorkingHoursController],
     providers: [WorkingHoursService],
+    exports: [WorkingHoursService] // Çalışma saatleri servisini dışarıya aktar
 })
 export class WorkingHoursModule { }

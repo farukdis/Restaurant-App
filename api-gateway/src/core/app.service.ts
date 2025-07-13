@@ -1,4 +1,4 @@
-// api-gateway/src/app.service.ts
+// api-gateway/src/core/app.service.ts
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';

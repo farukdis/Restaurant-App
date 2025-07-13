@@ -1,11 +1,8 @@
 // services/restaurant-service/src/dto/create-delivery-zone.dto.ts
 
-import { IsUUID, IsString, IsNumber, Min, IsObject, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsNumber, Min, IsObject, IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateDeliveryZoneDto {
-    @IsUUID()
-    restaurant_id: string;
-
     @IsString()
     zone_name: string;
 
