@@ -1,3 +1,4 @@
+// services/restaurant-service/src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,6 +9,7 @@ import { Restaurant } from './entities/restaurant.entity';
 import { WorkingHours } from './entities/working-hours.entity';
 import { DeliveryZone } from './entities/delivery-zone.entity';
 import { Setting } from './entities/setting.entity';
+import { DeliveryZonesModule } from './delivery-zones/delivery-zones.module'; // DeliveryZonesModule'ü import et
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { Setting } from './entities/setting.entity';
       inject: [ConfigService],
     }),
     RestaurantModule,
+    DeliveryZonesModule, // DeliveryZonesModule'ü buraya ekle
   ],
   controllers: [AppController],
   providers: [AppService],
