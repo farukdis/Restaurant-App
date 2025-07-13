@@ -54,6 +54,11 @@ export class MenuController {
         return this.appService.proxyRequest('menu-service', 3002, 'PUT', `admin/products/${id}`, req.body, req.headers);
     }
 
+    @Delete('admin/products/:id')
+    async deleteProduct(@Req() req: Request, @Param('id') id: string): Promise<any> {
+        return this.appService.proxyRequest('menu-service', 3002, 'DELETE', `admin/products/${id}`, null, req.headers);
+    }
+
     // TEST UÇ NOKTASI
     @Get('test-menu')
     async testMenuService(): Promise<any> {

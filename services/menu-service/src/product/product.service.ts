@@ -7,7 +7,6 @@ import { Product } from '../entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-
 @Injectable()
 export class ProductService {
     constructor(
@@ -21,7 +20,6 @@ export class ProductService {
     }
 
     async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
-        // Ürünü veritabanından ID'sine göre bul ve DTO'daki verilerle birleştir
         const product = await this.productRepository.preload({
             id,
             ...updateProductDto,
@@ -32,5 +30,13 @@ export class ProductService {
         }
 
         return this.productRepository.save(product);
+    }
+
+    async remove(id: string): Promise<void> {
+        const result = await this.productRepository.delete(id);
+
+        if (result.affected === 0) {
+            throw new NotFoundException(`ID'si "${id}" olan ürün bulunamadı.`);
+        }
     }
 }
