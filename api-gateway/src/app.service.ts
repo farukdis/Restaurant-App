@@ -1,3 +1,4 @@
+// api-gateway/src/app.service.ts
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -10,15 +11,20 @@ export class AppService {
     const serviceName = targetService.replace('-service', '');
     const url = `http://${targetService}:${port}/api/${serviceName}/${path}`;
 
-    // Headers'ı kopyala, Content-Length gibi otomatik ayarlanması gerekenleri çıkar
     const proxyHeaders = { ...headers };
     delete proxyHeaders['content-length'];
 
-    // Content-Type yoksa ekle (json olduğunu varsayıyoruz)
-    if (!proxyHeaders['content-type']) {
-      proxyHeaders['content-type'] = 'application/json';
+    // Sadece POST, PUT, PATCH gibi methodlarda Content-Type ayarla
+    const methodsWithBody = ['POST', 'PUT', 'PATCH'];
+    if (methodsWithBody.includes(method.toUpperCase())) {
+      if (!proxyHeaders['content-type']) {
+        proxyHeaders['content-type'] = 'application/json';
+      }
+    } else {
+      // Body'si olmayan isteklerde body parametresini null yap
+      body = null;
     }
-    // Host header doğru formatta olmalı
+
     proxyHeaders['host'] = `${targetService}:${port}`;
 
     try {
@@ -28,7 +34,7 @@ export class AppService {
           url,
           data: body,
           headers: proxyHeaders,
-          // timeout: 10000,
+          timeout: 30000,
         }),
       );
       return response.data;
@@ -46,5 +52,4 @@ export class AppService {
       );
     }
   }
-
 }
