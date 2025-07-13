@@ -10,7 +10,8 @@ import { WorkingHours } from './entities/working-hours.entity';
 import { DeliveryZone } from './entities/delivery-zone.entity';
 import { Setting } from './entities/setting.entity';
 import { DeliveryZonesModule } from './delivery-zones/delivery-zones.module';
-import { WorkingHoursModule } from './working-hours/working-hours.module'; // WorkingHoursModule'ü import et
+import { WorkingHoursModule } from './working-hours/working-hours.module';
+import { SettingsModule } from "./settings/settings.module";
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { WorkingHoursModule } from './working-hours/working-hours.module'; // Wo
     }),
     RestaurantModule,
     DeliveryZonesModule,
-    WorkingHoursModule, // WorkingHoursModule'ü buraya ekle
+    WorkingHoursModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
