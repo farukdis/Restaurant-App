@@ -1,3 +1,4 @@
+// menu-service/src/menu/menu.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -24,7 +25,7 @@ export class MenuService {
         private allergensRepository: Repository<Allergen>,
     ) { }
 
-    // Planımızdaki ilk endpoint için metot
+    // Mevcut metotlar korunuyor...
     async findAllCategories() {
         return this.categoriesRepository.find({
             where: { is_active: true },
@@ -32,18 +33,13 @@ export class MenuService {
         });
     }
 
-    // Planımızdaki ikinci endpoint için metot
     async findProductsByCategory(categoryId: string) {
-        // Kategoriye ait aktif ürünleri is_available'ı true olanları getirelim
         return this.productsRepository.find({
             where: { category: { id: categoryId }, is_available: true },
-            // İlişkileri de getirmek için gerekli ayarları burada yapabiliriz.
         });
     }
 
-    // Planımızdaki üçüncü endpoint için metot
     async findOneProduct(productId: string) {
-        // Ürünü ilişkili verilerle (modifiers, allergens) getirelim
         const product = await this.productsRepository.findOne({
             where: { id: productId },
             relations: ['allergens', 'modifiers', 'modifiers.modifierOptions'],
@@ -56,8 +52,33 @@ export class MenuService {
         return product;
     }
 
-    // **YENİ: Tüm ürünleri bulma metodu**
     async findAllProducts(): Promise<Product[]> {
         return this.productsRepository.find();
+    }
+
+    // --- YENİ EKLENEN METOTLAR ---
+
+    // Kategori ekleme metodu (Plan: POST /admin/categories)
+    async createCategory(categoryData: Partial<Category>): Promise<Category> {
+        const newCategory = this.categoriesRepository.create(categoryData);
+        return this.categoriesRepository.save(newCategory);
+    }
+
+    // Kategori güncelleme metodu (Plan: PUT /admin/categories/{id})
+    async updateCategory(id: string, categoryData: Partial<Category>): Promise<Category> {
+        await this.categoriesRepository.update(id, categoryData);
+        const updatedCategory = await this.categoriesRepository.findOne({ where: { id } });
+        if (!updatedCategory) {
+            throw new NotFoundException(`Category with ID "${id}" not found.`);
+        }
+        return updatedCategory;
+    }
+
+    // Kategori silme metodu (Plan: DELETE /admin/categories/{id})
+    async deleteCategory(id: string): Promise<void> {
+        const result = await this.categoriesRepository.delete(id);
+        if (result.affected === 0) {
+            throw new NotFoundException(`Category with ID "${id}" not found.`);
+        }
     }
 }

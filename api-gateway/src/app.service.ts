@@ -10,17 +10,25 @@ export class AppService {
     const serviceName = targetService.replace('-service', '');
     const url = `http://${targetService}:${port}/api/${serviceName}/${path}`;
 
+    // Headers'ı kopyala, Content-Length gibi otomatik ayarlanması gerekenleri çıkar
+    const proxyHeaders = { ...headers };
+    delete proxyHeaders['content-length'];
+
+    // Content-Type yoksa ekle (json olduğunu varsayıyoruz)
+    if (!proxyHeaders['content-type']) {
+      proxyHeaders['content-type'] = 'application/json';
+    }
+    // Host header doğru formatta olmalı
+    proxyHeaders['host'] = `${targetService}:${port}`;
+
     try {
       const response = await firstValueFrom(
         this.httpService.request({
           method: method as any,
           url,
           data: body,
-          headers: {
-            ...headers,
-            host: `${targetService}:${port}`,
-          },
-          timeout: 10000,
+          headers: proxyHeaders,
+          // timeout: 10000,
         }),
       );
       return response.data;
@@ -38,4 +46,5 @@ export class AppService {
       );
     }
   }
+
 }

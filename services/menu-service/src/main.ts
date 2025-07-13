@@ -1,3 +1,4 @@
+// menu-service/src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -10,8 +11,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('MENU_SERVICE_PORT') || 3002;
 
-  // Düzeltme: API ön eki sadece 'api' olacak
-  app.setGlobalPrefix('api');
+  // Global ön eki 'api' olarak düzeltildi
+  app.setGlobalPrefix('api/menu');
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
