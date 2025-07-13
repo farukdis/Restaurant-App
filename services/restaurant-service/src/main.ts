@@ -1,3 +1,4 @@
+// services/restaurant-service/src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -10,7 +11,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('RESTAURANT_SERVICE_PORT') || 3005;
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api/restaurant'); // Ön ek "api/restaurant" olarak düzeltildi
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
