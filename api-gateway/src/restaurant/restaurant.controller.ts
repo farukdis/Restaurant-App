@@ -8,6 +8,34 @@ import { Request } from 'express';
 export class RestaurantController {
     constructor(private readonly appService: AppService) { }
 
+    // RESTAURANT CRUD UÇ NOKTALARI (Yeni Eklendi)
+    @Post('admin/restaurants')
+    @HttpCode(HttpStatus.CREATED)
+    async createRestaurant(@Req() req: Request): Promise<any> {
+        return this.appService.proxyRequest('restaurant-service', 3005, 'POST', `admin/restaurants`, req.body, req.headers);
+    }
+
+    @Get('admin/restaurants')
+    async findAllRestaurants(@Req() req: Request): Promise<any> {
+        return this.appService.proxyRequest('restaurant-service', 3005, 'GET', `admin/restaurants`, null, req.headers);
+    }
+
+    @Get('admin/restaurants/:id')
+    async findOneRestaurant(@Req() req: Request, @Param('id') id: string): Promise<any> {
+        return this.appService.proxyRequest('restaurant-service', 3005, 'GET', `admin/restaurants/${id}`, null, req.headers);
+    }
+
+    @Put('admin/restaurants/:id')
+    async updateRestaurant(@Req() req: Request, @Param('id') id: string): Promise<any> {
+        return this.appService.proxyRequest('restaurant-service', 3005, 'PUT', `admin/restaurants/${id}`, req.body, req.headers);
+    }
+
+    @Delete('admin/restaurants/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async removeRestaurant(@Req() req: Request, @Param('id') id: string): Promise<any> {
+        return this.appService.proxyRequest('restaurant-service', 3005, 'DELETE', `admin/restaurants/${id}`, null, req.headers);
+    }
+
     // WORKING HOURS UÇ NOKTALARI
     @Get('admin/restaurants/:restaurantId/working-hours')
     async getWorkingHours(@Req() req: Request, @Param('restaurantId') restaurantId: string): Promise<any> {
@@ -15,6 +43,7 @@ export class RestaurantController {
     }
 
     @Post('admin/restaurants/:restaurantId/working-hours')
+    @HttpCode(HttpStatus.CREATED) // POST için CREATED status kodu eklendi
     async createWorkingHours(@Req() req: Request, @Param('restaurantId') restaurantId: string): Promise<any> {
         return this.appService.proxyRequest('restaurant-service', 3005, 'POST', `admin/restaurants/${restaurantId}/working-hours`, req.body, req.headers);
     }
@@ -31,6 +60,7 @@ export class RestaurantController {
     }
 
     @Post('admin/restaurants/:restaurantId/delivery-zones')
+    @HttpCode(HttpStatus.CREATED) // POST için CREATED status kodu eklendi
     async createDeliveryZone(@Req() req: Request, @Param('restaurantId') restaurantId: string): Promise<any> {
         return this.appService.proxyRequest('restaurant-service', 3005, 'POST', `admin/restaurants/${restaurantId}/delivery-zones`, req.body, req.headers);
     }
@@ -40,8 +70,7 @@ export class RestaurantController {
         return this.appService.proxyRequest('restaurant-service', 3005, 'PUT', `admin/restaurants/${restaurantId}/delivery-zones/${id}`, req.body, req.headers);
     }
 
-    // RESTAURANT INFO UÇ NOKTALARI (SETTINGS) - Bu kısım artık genel ayarlar için kullanılacak
-    // Rota ismi daha genel olacak şekilde güncellendi
+    // SETTINGS UÇ NOKTALARI
     @Get('admin/restaurants/:restaurantId/settings')
     async getSettings(@Req() req: Request, @Param('restaurantId') restaurantId: string): Promise<any> {
         return this.appService.proxyRequest('restaurant-service', 3005, 'GET', `admin/restaurants/${restaurantId}/settings`, null, req.headers);

@@ -1,44 +1,46 @@
-// services/restaurant-service/src/dto/create-restaurant.dto.ts
-
-import { IsString, IsPhoneNumber, IsOptional, IsUrl, IsNumber, Min, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUrl, IsNumber, Min } from 'class-validator';
 
 export class CreateRestaurantDto {
     @IsString()
+    @IsNotEmpty()
     name: string;
 
     @IsString()
+    @IsNotEmpty()
     address: string;
 
-    @IsPhoneNumber('TR')
+    @IsString()
+    @IsNotEmpty()
     phone_number: string;
 
+    @IsString()
     @IsOptional()
-    @IsEmail()
     email?: string;
 
-    @IsOptional()
     @IsString()
+    @IsOptional()
     description?: string;
 
+    @IsString()
     @IsOptional()
     @IsUrl()
     logo_url?: string;
 
-    @IsOptional()
     @IsString()
-    status?: string;
-
     @IsOptional()
+    status?: string; // 'OPEN', 'CLOSED', 'MAINTENANCE'
+
     @IsNumber()
     @Min(0)
+    @IsOptional()
     min_order_amount?: number;
 
-    @IsOptional()
     @IsNumber()
     @Min(0)
+    @IsOptional()
     default_delivery_fee?: number;
 
-    @IsOptional()
     @IsString()
+    @IsOptional()
     currency?: string;
 }
