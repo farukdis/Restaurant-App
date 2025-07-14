@@ -1,84 +1,42 @@
-// menu-service/src/menu/menu.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
-// Entity'leri import ediyoruz
-import { Category } from '../entities/category.entity';
-import { Product } from '../entities/product.entity';
-import { Modifier } from '../entities/modifier.entity';
-import { ModifierOption } from '../entities/modifier-option.entity';
-import { Allergen } from '../entities/allergen.entity';
+import { Menu } from '../entities/menu.entity';
+import { CreateMenuDto } from './dto/create-menu.dto';
+import { UpdateMenuDto } from './dto/update-menu.dto';
 
 @Injectable()
 export class MenuService {
     constructor(
-        @InjectRepository(Category)
-        private categoriesRepository: Repository<Category>,
-        @InjectRepository(Product)
-        private productsRepository: Repository<Product>,
-        @InjectRepository(Modifier)
-        private modifiersRepository: Repository<Modifier>,
-        @InjectRepository(ModifierOption)
-        private modifierOptionsRepository: Repository<ModifierOption>,
-        @InjectRepository(Allergen)
-        private allergensRepository: Repository<Allergen>,
+        @InjectRepository(Menu)
+        private menusRepository: Repository<Menu>,
     ) { }
 
-    // Mevcut metotlar korunuyor...
-    async findAllCategories() {
-        return this.categoriesRepository.find({
-            where: { is_active: true },
-            order: { order_index: 'ASC' },
-        });
+    async create(createMenuDto: CreateMenuDto): Promise<Menu> {
+        const newMenu = this.menusRepository.create(createMenuDto);
+        return this.menusRepository.save(newMenu);
     }
 
-    async findProductsByCategory(categoryId: string) {
-        return this.productsRepository.find({
-            where: { category: { id: categoryId }, is_available: true },
-        });
+    async findAll(): Promise<Menu[]> {
+        return this.menusRepository.find();
     }
 
-    async findOneProduct(productId: string) {
-        const product = await this.productsRepository.findOne({
-            where: { id: productId },
-            relations: ['allergens', 'modifiers', 'modifiers.modifierOptions'],
-        });
-
-        if (!product) {
-            throw new NotFoundException(`Product with ID "${productId}" not found.`);
+    async findOne(id: string): Promise<Menu> {
+        const menu = await this.menusRepository.findOne({ where: { id } });
+        if (!menu) {
+            throw new NotFoundException(`Menu with ID "${id}" not found.`);
         }
-
-        return product;
+        return menu;
     }
 
-    async findAllProducts(): Promise<Product[]> {
-        return this.productsRepository.find();
+    async update(id: string, updateMenuDto: UpdateMenuDto): Promise<Menu> {
+        const menu = await this.findOne(id);
+        this.menusRepository.merge(menu, updateMenuDto);
+        return this.menusRepository.save(menu);
     }
 
-    // --- YENİ EKLENEN METOTLAR ---
-
-    // Kategori ekleme metodu (Plan: POST /admin/categories)
-    async createCategory(categoryData: Partial<Category>): Promise<Category> {
-        const newCategory = this.categoriesRepository.create(categoryData);
-        return this.categoriesRepository.save(newCategory);
-    }
-
-    // Kategori güncelleme metodu (Plan: PUT /admin/categories/{id})
-    async updateCategory(id: string, categoryData: Partial<Category>): Promise<Category> {
-        await this.categoriesRepository.update(id, categoryData);
-        const updatedCategory = await this.categoriesRepository.findOne({ where: { id } });
-        if (!updatedCategory) {
-            throw new NotFoundException(`Category with ID "${id}" not found.`);
-        }
-        return updatedCategory;
-    }
-
-    // Kategori silme metodu (Plan: DELETE /admin/categories/{id})
-    async deleteCategory(id: string): Promise<void> {
-        const result = await this.categoriesRepository.delete(id);
-        if (result.affected === 0) {
-            throw new NotFoundException(`Category with ID "${id}" not found.`);
-        }
+    async remove(id: string): Promise<void> {
+        const menu = await this.findOne(id);
+        await this.menusRepository.remove(menu);
     }
 }

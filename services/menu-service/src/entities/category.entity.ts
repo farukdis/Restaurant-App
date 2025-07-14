@@ -1,6 +1,6 @@
-// services/menu-service/src/entities/category.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Product } from './product.entity'; // İleride oluşturacağız
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Product } from './product.entity';
+import { Menu } from './menu.entity'; // Yeni import
 
 @Entity('categories') // Veritabanındaki tablo adı
 export class Category {
@@ -24,6 +24,14 @@ export class Category {
 
     @UpdateDateColumn({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
     updated_at: Date;
+
+    @Column({ type: 'uuid', name: 'menu_id', nullable: false })
+    menu_id: string;
+
+    // İlişki: Bir kategori bir menüye aittir (ManyToOne)
+    @ManyToOne(() => Menu, menu => menu.categories)
+    @JoinColumn({ name: 'menu_id' })
+    menu: Menu;
 
     // İlişki: Bir kategoriye birden fazla ürün ait olabilir (OneToMany)
     @OneToMany(() => Product, product => product.category)

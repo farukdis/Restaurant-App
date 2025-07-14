@@ -1,78 +1,40 @@
-// menu-service/src/menu/menu.controller.ts
-import {
-    Controller,
-    Get,
-    Post,
-    Put,
-    Delete,
-    Param,
-    ParseUUIDPipe,
-    Body,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseUUIDPipe, HttpCode, HttpStatus } from '@nestjs/common';
 import { MenuService } from './menu.service';
-import { Product } from '../entities/product.entity';
-import { Category } from '../entities/category.entity';
+import { CreateMenuDto } from './dto/create-menu.dto';
+import { UpdateMenuDto } from './dto/update-menu.dto';
 
-@Controller('')
+@Controller('admin/restaurants/:restaurantId/menus')
 export class MenuController {
     constructor(private readonly menuService: MenuService) { }
 
-    // MÜŞTERİ UÇ NOKTALARI
-    @Get('categories')
-    async findAllCategories() {
-        return this.menuService.findAllCategories();
-    }
-
-    @Get('categories/:categoryId/products')
-    async findProductsByCategory(
-        @Param('categoryId', new ParseUUIDPipe()) categoryId: string,
-    ) {
-        return this.menuService.findProductsByCategory(categoryId);
-    }
-
-    @Get('products')
-    async findAllProducts(): Promise<Product[]> {
-        return this.menuService.findAllProducts();
-    }
-
-    @Get('products/:productId')
-    async findOneProduct(
-        @Param('productId', new ParseUUIDPipe()) productId: string,
-    ): Promise<Product> {
-        return this.menuService.findOneProduct(productId);
-    }
-
-    // --- YENİ EKLENEN TEST UÇ NOKTASI ---
-    @Get('test-menu')
-    async testMenuService(): Promise<any> {
-        return {
-            message: 'Menu Service\'den başarıyla yanıt alındı!'
+    @Post()
+    @HttpCode(HttpStatus.CREATED)
+    async create(@Param('restaurantId', ParseUUIDPipe) restaurantId: string, @Body() createMenuDto: CreateMenuDto) {
+        const menuData = {
+            ...createMenuDto,
+            restaurant_id: restaurantId,
         };
+        return this.menuService.create(menuData);
     }
 
-    // --- YÖNETİCİ UÇ NOKTALARI ---
-    // Not: Bu uç noktalar için AuthGuard ve Roles Guard'lar sonra eklenecek.
-    // Örneğin: @UseGuards(AuthGuard) @Roles('RESTAURANT_OWNER') gibi.
-
-    @Post('admin/categories')
-    async createCategory(@Body() categoryData: Partial<Category>): Promise<Category> {
-        console.log('📥 Menü Servisi: POST kategorisi çağrıldı');
-        console.log('Gelen Body:', categoryData);
-        return this.menuService.createCategory(categoryData);
+    @Get()
+    async findAll() {
+        return this.menuService.findAll();
     }
 
-    @Put('admin/categories/:id')
-    async updateCategory(
-        @Param('id', new ParseUUIDPipe()) id: string,
-        @Body() categoryData: Partial<Category>,
-    ): Promise<Category> {
-        return this.menuService.updateCategory(id, categoryData);
+    @Get(':id')
+    async findOne(@Param('id', ParseUUIDPipe) id: string) {
+        return this.menuService.findOne(id);
     }
 
-    @Delete('admin/categories/:id')
-    async deleteCategory(
-        @Param('id', new ParseUUIDPipe()) id: string,
-    ): Promise<void> {
-        return this.menuService.deleteCategory(id);
+    @Put(':id')
+    async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateMenuDto: UpdateMenuDto) {
+        return this.menuService.update(id, updateMenuDto);
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async remove(@Param('id', ParseUUIDPipe) id: string) {
+        return this.menuService.remove(id);
     }
 }

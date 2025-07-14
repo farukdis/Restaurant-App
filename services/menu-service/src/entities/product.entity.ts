@@ -1,8 +1,8 @@
 // services/menu-service/src/entities/product.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Category } from './category.entity';
-import { ProductAllergen } from './product-allergen.entity'; // İleride oluşturacağız
-import { ProductModifier } from './product-modifier.entity'; // İleride oluşturacağız
+import { ProductAllergen } from './product-allergen.entity';
+import { ProductModifier } from './product-modifier.entity';
 
 @Entity('products') // Veritabanındaki tablo adı
 export class Product {
